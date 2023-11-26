@@ -16,6 +16,7 @@ type Data struct {
 func main() {
 
 	connString := "server=LAPTOP-G5TDHLRV\\SQL_IAD;port=1433;database=learning;user id=Final_Year_Project;password=fyp;"
+	// connString := "server=LAPTOP-G5TDHLRV\\SQL_IAD;port=1433;database=Inventory;user id=Final_Year_Project;password=fyp;"
 
 	// Open a connection to the database
 	db, err := sql.Open("sqlserver", connString)
@@ -34,9 +35,9 @@ func main() {
 
 	fmt.Println("Connected to the database!")
 
-	result, err := db.Exec("INSERT INTO data (id, name) VALUES (5, 'Tomy');")
-	CheckError(err)
-	fmt.Println("Row inserted Sucessfully : ", result)
+	// result, err := db.Exec("INSERT INTO data (id, name) VALUES (5, 'Tomy');")
+	// CheckError(err)
+	// fmt.Println("Row inserted Sucessfully : ", result)
 	// lastInsertedId, err := result.LastInsertId()
 	// fmt.Println("Last Inserted Id = ", lastInsertedId)
 	// CheckError(err)
@@ -46,6 +47,7 @@ func main() {
 	// CheckError(err)
 
 	rows, err := db.Query("Select * from data;")
+	// rows, err := db.Query("Select id,name,quantity,price from products")
 	CheckError(err)
 	fmt.Println("Rows Selected Successfully")
 
