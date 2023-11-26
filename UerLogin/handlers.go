@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -31,8 +33,18 @@ func loginAPI(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	// Basic authentication logic (replace with your own authentication logic)
-	if username == "user" && password == "password" {
+	// Query the database for the user's credentials
+	var storedPassword string
+	// err = db.QueryRow("SELECT Password FROM UserLogin WHERE Username = ?", username).Scan(&storedPassword)
+	err = db.QueryRow("SELECT Password FROM UserLogin WHERE Username = @username", sql.Named("username", username)).Scan(&storedPassword)
+	if err != nil {
+		log.Printf("Error querying database: %v", err)
+		http.Error(w, "User not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Compare the provided password with the stored password
+	if password == storedPassword {
 		fmt.Fprintln(w, "Login successful")
 	} else {
 		http.Error(w, "Login failed", http.StatusUnauthorized)
