@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	_ "github.com/denisenkom/go-mssqldb"
 	"github.com/gorilla/mux"
@@ -62,7 +63,74 @@ func (app *App) getProducts(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func (app *App) getProduct(w http.ResponseWriter, r *http.Request) {
+
+	vars := mux.Vars(r)
+	key, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		sendError(w, http.StatusBadRequest, "Invalid Product Id")
+		return
+	}
+	p := product{ID: key}
+	errs := p.getProduct(app.DB)
+	if errs != nil {
+		switch errs {
+		case sql.ErrNoRows:
+			sendError(w, http.StatusNotFound, "Product Not Found")
+
+		default:
+			sendError(w, http.StatusInternalServerError, errs.Error())
+		}
+		return
+	}
+	sendResponse(w, http.StatusOK, p)
+
+}
+
+func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
+
+	var p product
+	err := json.NewDecoder(r.Body).Decode(&p)
+	if err != nil {
+		sendError(w, http.StatusBadRequest, "Invalid Request Payload")
+		return
+	}
+	err2 := p.createProduct(app.DB)
+	if err2 != nil {
+		sendError(w, http.StatusInternalServerError, err2.Error())
+		return
+	}
+	sendResponse(w, http.StatusOK, p)
+
+}
+
+func (app *App) updateProduct(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		sendError(w, http.StatusBadRequest, "Invalid Product Id")
+		return
+	}
+
+	var p product
+	err2 := json.NewDecoder(r.Body).Decode(&p)
+	if err2 != nil {
+		sendError(w, http.StatusBadRequest, "Invalid Request Payload")
+		return
+	}
+	p.ID = key
+
+	err3 := p.updateProduct(app.DB)
+	if err3 != nil {
+		sendError(w, http.StatusInternalServerError, err3.Error())
+		return
+	}
+	sendResponse(w, http.StatusOK, p)
+}
+
 func (app *App) handleRoutes() {
 	app.Router.HandleFunc("/products", app.getProducts).Methods("GET")
-	// app.Router.HandleFunc("/products/{id}", app.getProduct).Methods("GET")
+	app.Router.HandleFunc("/product/{id}", app.getProduct).Methods("GET")
+	app.Router.HandleFunc("/product", app.createProduct).Methods("POST")
+	app.Router.HandleFunc("/product/{id}", app.updateProduct).Methods("PUT")
 }
