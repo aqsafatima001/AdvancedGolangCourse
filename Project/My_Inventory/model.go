@@ -70,11 +70,12 @@ func (p *product) createProduct(db *sql.DB) error {
 }
 
 func (p *product) updateProduct(db *sql.DB) error {
-	query := fmt.Sprintf("Update products set name ='%v' , quanitiy = %v , price = %v where id = %v ", p.Name, p.Quantity, p.Price, p.ID)
+	query := fmt.Sprintf("Update products set name ='%v' , quantity = %v , price = %v where id = %v ", p.Name, p.Quantity, p.Price, p.ID)
 
 	_, err := db.Exec(query)
 	if err != nil {
 		return err
 	}
+	return nil
 
 }
