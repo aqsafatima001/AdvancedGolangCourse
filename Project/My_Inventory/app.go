@@ -100,7 +100,7 @@ func (app *App) createProduct(w http.ResponseWriter, r *http.Request) {
 		sendError(w, http.StatusInternalServerError, err2.Error())
 		return
 	}
-	sendResponse(w, http.StatusOK, p)
+	sendResponse(w, http.StatusCreated, p)
 
 }
 
